@@ -28,18 +28,28 @@ const CONFIG = {
 async function pushWeWork(title, price, changeRate, high, time) {
     try {
         // 1. 获取 Access Token
-        const tokenUrl = `https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${CONFIG.WEWORK_CORPID}&corpsecret=${CONFIG.WEWORK_SECRET}`;
+        // 建议在这里加上 .trim() 防止环境变量里意外带入空格
+        const corpid = CONFIG.WEWORK_CORPID.trim();
+        const secret = CONFIG.WEWORK_SECRET.trim();
+        
+        const tokenUrl = `https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${corpid}&corpsecret=${secret}`;
         const tokenRes = await axios.get(tokenUrl);
-        const accessToken = tokenRes.data.access_token;
 
-        if (!accessToken) throw new Error('未能获取到企业微信 Token，请检查参数');
+        // 重点：检查返回的数据结构
+        if (tokenRes.data.errcode !== 0 || !tokenRes.data.access_token) {
+            console.error('❌ 企业微信 Token 获取失败:', JSON.stringify(tokenRes.data));
+            return; // 终止执行
+        }
+
+        const accessToken = tokenRes.data.access_token;
+        console.log('✅ Token 获取成功，准备发送消息...');
 
         // 2. 发送应用消息
         const sendUrl = `https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=${accessToken}`;
         const postData = {
             touser: "@all", 
             msgtype: "textcard",
-            agentid: CONFIG.WEWORK_AGENTID,
+            agentid: parseInt(CONFIG.WEWORK_AGENTID), // 确保 AgentID 是数字
             textcard: {
                 title: title,
                 description: `💰 当前价格：${price}\n📈 今日涨幅：${changeRate}%\n🔥 今日最高：${high}\n⏰ 更新时间：${time}`,
@@ -48,15 +58,15 @@ async function pushWeWork(title, price, changeRate, high, time) {
             }
         };
 
-        await axios.post(sendUrl, postData);
-        console.log('✅ 企业微信推送成功');
-    } catch (e) {
-        // 增加这行，打印具体的接口返回信息
-        if (e.response && e.response.data) {
-            console.error('❌ 企业微信接口返回错误详情:', JSON.stringify(e.response.data));
+        const sendRes = await axios.post(sendUrl, postData);
+        
+        if (sendRes.data.errcode === 0) {
+            console.log('✅ 企业微信消息推送成功');
         } else {
-            console.error('❌ 企业微信推送失败:', e.message);
+            console.error('❌ 消息推送失败，错误详情:', JSON.stringify(sendRes.data));
         }
+    } catch (e) {
+        console.error('❌ 企业微信函数执行异常:', e.message);
     }
 }
 
