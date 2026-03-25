@@ -1,0 +1,25 @@
+name: Gold Price Bot
+
+on:
+  schedule:
+    - cron: '0 * * * *' # 每小时运行一次
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install deps
+        run: npm install
+      - name: Run
+        env:
+          ALI_APP_CODE: ${{ secrets.ALI_APP_CODE }}
+          PUSH_KEY: ${{ secrets.PUSH_KEY }}
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+        run: node monitor.js
