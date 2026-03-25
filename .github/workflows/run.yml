@@ -9,13 +9,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      # 1. 升级到 v4，支持更高版本的 Node.js
+      - uses: actions/checkout@v4 
+
+      # 2. 升级到 v4，并将 node-version 改为 24
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '24' 
+
       - name: Install deps
         run: npm install
+
       - name: Run
         env:
           ALI_APP_CODE: ${{ secrets.ALI_APP_CODE }}
