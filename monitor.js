@@ -7,7 +7,7 @@ const CONFIG = {
     MAIL_USER: process.env.MAIL_USER,
     MAIL_PASS: process.env.MAIL_PASS,
     MAIL_TO: process.env.MAIL_TO || process.env.MAIL_USER,
-    APP_CODE:'252aca7da7ef46bbaf466514a18eeb52',
+    APP_CODE: process.env.ALI_APP_CODE,
     // 策略设置
     TARGET_PRICE: 900,      // 价格超过 900 提醒
     TARGET_CHG_RATE: 4.0,    // 涨幅超过 4.0% 提醒
