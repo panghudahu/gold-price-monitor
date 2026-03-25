@@ -51,7 +51,12 @@ async function pushWeWork(title, price, changeRate, high, time) {
         await axios.post(sendUrl, postData);
         console.log('✅ 企业微信推送成功');
     } catch (e) {
-        console.error('❌ 企业微信推送失败:', e.message);
+        // 增加这行，打印具体的接口返回信息
+        if (e.response && e.response.data) {
+            console.error('❌ 企业微信接口返回错误详情:', JSON.stringify(e.response.data));
+        } else {
+            console.error('❌ 企业微信推送失败:', e.message);
+        }
     }
 }
 
